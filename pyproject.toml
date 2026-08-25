@@ -2,6 +2,7 @@
 name = "openbb-ada"
 version = "0.0.1"
 description = "OpenBB Copilot / Ada"
+license = "Apache-2.0"
 authors = ["Michael Struwig <michael.struwig@openbb.finance>"]
 readme = "README.md"
 
