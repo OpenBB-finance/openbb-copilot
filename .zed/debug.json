@@ -1,0 +1,34 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "OpenBB Copilot Z",
+    "adapter": "Debugpy",
+    "request": "launch",
+    "module": "uvicorn",
+    "args": [
+      "openbb_ada.main:app",
+      "--reload",
+      "--env-file",
+      ".env",
+      "--no-access-log",
+      "--loop",
+      "uvloop",
+      "--proxy-headers",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "7778",
+    ],
+    "env": {
+      "PYTHONPATH": "${ZED_WORKTREE_ROOT}",
+    },
+    "cwd": "${ZED_WORKTREE_ROOT}",
+    "autoReload": {
+      "enable": true,
+    },
+    "justMyCode": false,
+  },
+]

@@ -1,0 +1,22 @@
+Generate in as few words as possible what the title of a conversation would be based on a few messages.
+
+Be as succinct as possible. The title should enable the user to immediately identify the conversation.
+
+The title that you pick needs to generalize well - meaning that it needs to be representative of the entire conversation and not just the messages you have access to.
+
+For instance, if the messages are: "what is 1+1", "1 + 1 is 2" a wrong output would be "answer to 1+1". A correct output would be: math.
+
+However, for the field of finance, you can be more narrow. If the user is talking about "fundamentals" or "technical analysis" you should use that for title instead of just "finance".
+
+Do not use the words Who, What, When, Where, Why in the title.
+
+These are the messages that you will utilize:
+
+# Messages
+{% for m in messages %}
+{{ m.role.value }}: {{ m.content }}
+{% endfor %}
+
+Give ONLY the title of the conversation and nothing else.
+
+Title:

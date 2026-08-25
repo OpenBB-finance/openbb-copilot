@@ -1,0 +1,9 @@
+{% for search_result in search_results %}
+=== EXCERPT ID: {{ search_result.source_info.metadata.excerpt_id }} ===
+{% for key, value in search_result.source_info.metadata.items() %}
+{{ key }}: {{ value }}
+{% endfor %}
+
+{{ search_result.content }}
+-----
+{% endfor %}

@@ -1,0 +1,31 @@
+Guidance:
+
+{% if artifact %}
+Artifact Name: `{{ artifact.source_info.name }}` <-- use this when returning the artifact
+Generated SQL Query: {{ sql_query }}
+
+{% if artifact.data_format.query_data_source %}
+Data Source Information:
+- Origin: {{ artifact.data_format.query_data_source.origin }}
+- ID: {{ artifact.data_format.query_data_source.id }}
+- Widget UUID: {{ artifact.data_format.query_data_source.widget_uuid }}
+{% endif %}
+
+{% if generate_query_only %}
+IMPORTANT: This query was GENERATED but NOT automatically executed. The user has generative UI disabled, so the query was not applied to the widget.
+Present this SQL as a suggestion for the user to review. Do NOT say the widget has been updated or that the query has been run.
+Instead, explain what the query does and let the user know they can apply it manually.
+If the user later asks you to apply, add, or update this query on the dashboard, reuse this SQL exactly as generated in the artifact. Do NOT strip quotes, rename identifiers, change aliases, or otherwise rewrite the SQL unless the user explicitly asks for a modification.
+You can insert this artifact in your final response by writing <|start_artifact_id|>{{ artifact.source_info.name }}<|end_artifact_id|>
+You MUST reference it exactly once in your final answer using that tag.
+When users request to create or run a query, always respond with this artifact reference.
+IMPORTANT: Do not respond with the SQL query as plain text, only reference the artifact using the tag.
+{% else %}
+IMPORTANT: This query was generated for follow-up action. Do NOT stop after only returning the artifact if the user asked you to add, update, or otherwise use this query on the dashboard.
+If the user is asking to add, create, make, place, duplicate, or otherwise create another/separate dashboard widget from this query, call `llm_generate_widget_in_dashboard` with `artifact_id="{{ artifact.source_info.name }}"` and the widget type that matches the user's request. Use `widget_type="table"` for table output, or `widget_type="chart"` with the required `chart_params` when the user wants a chart. Ada will translate this SQL artifact into the concrete dashboard widget request.
+Only call `llm_update_widget_in_dashboard` when the user clearly wants to modify or replace an existing dashboard SQL widget.
+When you apply this query to an existing widget, use the SQL from this artifact exactly as generated. Do NOT remove quotes, rename identifiers, or make any other edits unless the user explicitly asked you to change the SQL itself.
+When the user refers to an earlier query or table but asks for another/new/separate widget, treat that earlier query or table as the source for a NEW widget, not as the widget to update in place.
+Only reference the artifact in a final answer when the user's request is satisfied without any further tool calls.
+{% endif %}
+{% endif %}

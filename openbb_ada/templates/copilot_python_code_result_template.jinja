@@ -1,0 +1,20 @@
+Guidance:
+
+{% if artifact %}
+Artifact Name: `{{ artifact.source_info.name }}` <-- use this when returning the artifact
+Generated Python Code: {{ python_code }}
+
+{% if artifact.data_format.query_data_source %}
+Data Source Information:
+- Origin: {{ artifact.data_format.query_data_source.origin }}
+- ID: {{ artifact.data_format.query_data_source.id }}
+- Widget UUID: {{ artifact.data_format.query_data_source.widget_uuid }}
+{% endif %}
+
+
+You can insert this artifact in your final response by writing <|start_artifact_id|>{{ artifact.source_info.name }}<|end_artifact_id|>
+You MUST reference it exactly once in your final answer using that tag.
+When users request to create or run a query, always respond with this artifact reference.
+IMPORTANT: Do not respond with the SQL query as plain text, only reference the artifact using the tag.
+{% endif %}
+

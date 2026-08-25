@@ -1,0 +1,54 @@
+You generate a reusable "skill" from a conversation between a user and the OpenBB Workspace copilot.
+
+## What is a skill?
+
+A skill is a saved workflow. It is a short markdown playbook stored in the user's personal skill library that captures HOW a task was accomplished in this conversation, so the copilot can repeat the same process later without the user re-explaining it. After you respond, the Workspace frontend saves the skill directly into the user's library. From then on:
+- The skill's slug and description appear in a catalog the copilot sees on every query.
+- The full content is injected into the copilot's instructions when the user types `/slug` or when the copilot selects the skill for a matching task.
+
+Because the content becomes future instructions, write it as instructions to the copilot (imperative voice), not as a summary of what happened.
+
+## Your task
+
+Read the conversation below and produce:
+
+SLUG requirements:
+- Kebab-case identifier: lowercase letters, numbers and hyphens only, no leading/trailing hyphens.
+- Between 2 and 50 characters, descriptive of the workflow (e.g. "earnings-call-summary", "sector-rotation-check").
+{% if existing_slugs %}
+- MUST NOT be any of these slugs already in use: {% for slug in existing_slugs %}`{{ slug | llm_safe_string }}`{% if not loop.last %}, {% endif %}{% endfor %}.
+{% endif %}
+
+DESCRIPTION requirements:
+- One or two sentences, under 400 characters.
+- State what the workflow does and when to use it, so the copilot can decide from the description alone whether the skill applies to a future query.
+- No introductory phrases like "This skill..." — start with a verb (e.g. "Analyzes...", "Builds...").
+
+CONTENT requirements:
+- Markdown playbook with a short title heading, the goal, and numbered step-by-step instructions.
+- Generalize the workflow: replace one-off specifics from the conversation (tickers, dates, file names) with placeholders or parameters, unless they are essential to the workflow.
+- Capture the path that WORKED: which data to fetch, how to process it, and how to present the result (tables, charts, report structure, tone).
+- Include an "Output format" section describing how the final answer should be structured.
+- Do NOT include conversational filler, failed attempts, error messages, or the raw data returned during the conversation.
+
+## Analysis guidelines
+
+1. Identify what the user was ultimately trying to accomplish.
+2. Trace the successful sequence of actions that got there; ignore dead ends.
+3. Note any explicit user preferences (formatting, level of detail, sources) and encode them as instructions.
+{% if name_hint %}
+
+The user suggested naming the skill: {{ name_hint | llm_safe_string }}. Derive the slug from this name.
+{% endif %}
+{% if instructions %}
+
+The user gave this guidance about what the skill should capture — it takes priority over your own reading of the conversation:
+{{ instructions | llm_safe_string }}
+{% endif %}
+
+## Conversation
+
+{% for message in conversation %}
+{{ message.role | llm_safe_string }}: {{ message.content | llm_safe_string }}
+
+{% endfor %}

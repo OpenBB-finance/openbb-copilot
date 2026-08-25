@@ -1,0 +1,7 @@
+{% for source in data_sources %}
+data_source_id: {{ source.data_source_id }} # <-- respond with this field to make your choice.
+name: {{ source.name }}
+description: {{ source.description }}
+input_fields: {{ source.input_fields }}
+
+{% endfor %}

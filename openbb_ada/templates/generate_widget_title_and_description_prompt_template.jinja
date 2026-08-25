@@ -1,0 +1,163 @@
+Generate comprehensive metadata for a data widget including title, description, category, and subcategory based on the provided data.
+
+METADATA REQUIREMENTS:
+
+TITLE:
+- Create a concise, descriptive widget title (3-6 words)
+- Should clearly indicate what the data represents
+- Use financial/business terminology when appropriate
+- If the data, description, filename, or metadata contains material identifiers such as a ticker/company and an explicit reporting period, include those identifiers in the title when it remains concise. Preserve visible year text from the source, and do not drop quarter, fiscal year, or date information when it distinguishes the dataset.
+- Examples: "Stock Price Tracker", "Revenue Performance", "Market Volatility"
+
+DESCRIPTION:
+- Start directly with the data type/category (e.g., "Financial performance metrics", "Stock price movements", "Revenue breakdown")
+- Do NOT use introductory phrases like "This table presents", "This data shows", "Analysis of", etc.
+- Be specific about the domain (financial, operational, statistical, etc.)
+- Include relevant time periods, sectors, or categories if evident
+- Keep to one factual sentence
+
+CATEGORY:
+- High-level classification of the data domain
+- Common categories: "Equity", "Economy", "Crypto", "Fixed Income", "Derivatives", "Alternative", "ESG", "Sports", "Prediction Markets", "Custom"
+- Choose the most appropriate category based on data content
+
+SUBCATEGORY:
+- More specific classification within the category
+- Examples for Equity: "Fundamentals", "Technical", "Options", "Screening", "Performance"
+- Examples for Economy: "GDP", "Inflation", "Employment", "Trade", "Indicators"
+- Examples for Crypto: "Prices", "Market Cap", "Trading", "DeFi", "NFT"
+- Examples for Sports: "Racing", "Football", "Basketball", "Tennis", "Olympics"
+- Examples for Prediction Markets: "Politics", "Sports", "Technology", "Economics", "Entertainment"
+
+ANALYSIS GUIDELINES:
+- Analyze ONLY the provided data - no creative content
+- For tables: identify data type from headers/columns (financial ratios, stock prices, performance metrics, betting markets, etc.)
+- For time series: note temporal patterns and data categories
+- For prediction/betting markets: identify the event type and market structure
+- Use ticker symbols, financial terms, sports terminology, or domain identifiers when present
+- Leverage metadata, filenames, and indices for context
+
+{% if name %}
+The name of the widget is {{ name | llm_safe_string }}.
+{% endif %}
+
+{% if description %}
+The description of the widget is: {{ description | llm_safe_string }}
+{% endif %}
+
+{% if metadata %}
+The metadata of the widgets is:
+{{ metadata | llm_safe_string }}
+{% endif %}
+
+{% if metadata and metadata.query %}
+PRIMARY QUERY/CODE CONTEXT:
+The widget is defined by the following query/code. Use this as the PRIMARY signal for the title, description, category, and subcategory. The data preview below is only an example output from the current run.
+
+{{ metadata.query | llm_safe_string }}
+
+If the query/code intent and the preview seem different, trust the query/code because it represents what the widget is designed to retrieve or compute.
+{% endif %}
+
+{% if metadata and metadata.query %}
+QUERY/CODE ANALYSIS:
+Use the query/code text as the primary signal for the widget's function, and use the data preview as a secondary signal.
+- Focus on what the query/code retrieves, computes, or prepares
+- Prefer business meaning over implementation details
+- For SQL-like queries, use selected fields, joins, filters, and aggregations
+- For code, use transformations, calculations, dataframe operations, and output purpose
+{% endif %}
+
+{% if widget_data %}
+{% if metadata and metadata.query %}
+Data preview (secondary signal when query/code is present):
+{% else %}
+Data preview:
+{% endif %}
+{{ widget_data | llm_safe_string }}
+{% endif %}
+
+EXAMPLES:
+
+Example 1 - Stock Data:
+Title: Apple Stock Analysis
+Description: Daily stock price movements and technical indicators for AAPL equity.
+Category: Equity
+Subcategory: Technical
+
+Example 2 - Economic Data:
+Title: GDP Growth Tracker
+Description: Quarterly gross domestic product growth rates across major economies.
+Category: Economy
+Subcategory: GDP
+
+Example 3 - Options Data:
+Title: Options Flow Monitor
+Description: Real-time options trading volume and open interest for S&P 500 components.
+Category: Equity
+Subcategory: Options
+
+Example 4 - Sports Betting Data (No Parameters):
+Title: F1 Race Predictions
+Description: Formula 1 Azerbaijan Grand Prix winner and constructor betting markets with Yes/No outcomes.
+Category: Sports
+Subcategory: Racing
+
+Example 5 - Parametrized Event Search:
+Title: Event Search
+Description: Sports betting market search results with event details, timelines, and betting options.
+Category: Sports
+Subcategory: Racing
+(Note: Generic title works for F1, politics, entertainment, etc.)
+
+Example 6 - Parametrized Market Details:
+Title: Market Details
+Description: Prediction market event information including status, timeline, and available betting markets.
+Category: Prediction Markets
+Subcategory: Sports
+(Note: Generic enough to work for any market type)
+
+Example 7 - SQL Query (Simple Select):
+Title: User Account Data
+Description: User account information including profile details and account status.
+Category: Custom
+Subcategory: Database
+
+Example 8 - SQL Query (Aggregation):
+Title: Monthly Revenue Summary
+Description: Aggregated sales revenue grouped by month with product category breakdown.
+Category: Custom
+Subcategory: Database
+
+Example 9 - SQL Query (Join):
+Title: Order Customer Details
+Description: Order records with associated customer information and shipping addresses.
+Category: Custom
+Subcategory: Database
+
+Example 10 - SQL Query (SEC Filing with ITEM_TITLE filter):
+Title: MD&A Disclosure Content
+Description: Management's Discussion and Analysis narrative text extracted from SEC 10-K and 10-Q filings.
+Category: Equity
+Subcategory: Fundamentals
+(Note: The ITEM_TITLE filter specifies this is MD&A content, not generic "KPIs" based on the table name)
+
+Example 11 - Python Query (Dataframe Aggregation):
+Title: Revenue Trend Analysis
+Description: Python dataframe analysis calculating revenue trends and summary metrics across reporting periods.
+Category: Equity
+Subcategory: Fundamentals
+
+Example 12 - Python Query (Chart Preparation):
+Title: Volatility Comparison Prep
+Description: Python workflow transforming market data into comparative volatility metrics for charting and analysis.
+Category: Equity
+Subcategory: Technical
+
+Output format:
+Title: [Short descriptive widget title]
+Description: [Direct, factual sentence about data type/nature - no introductory phrases]
+Category: [High-level data domain category]
+Subcategory: [Specific classification within category]
+
+Remember: Be precise and domain-specific. Use standard financial/business terminology.

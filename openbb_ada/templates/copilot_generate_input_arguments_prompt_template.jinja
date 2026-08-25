@@ -1,0 +1,123 @@
+# Instructions
+
+Given the user query and data source, generate the appropriate input arguments for the schema.
+
+## Current date and time
+
+{{ current_datetime }}
+
+Use this as guidance when generating input arguments that require a specific year, quarter, date, etc.
+eg. if the user asks for "the latest data", use the current date, time, or input argument values as guidance for the year, quarter, date, etc.
+
+## PARAMETER GENERATION INSTRUCTIONS
+
+**GOLDEN RULE: Only change parameters that are EXPLICITLY mentioned in the user's request.**
+
+1. KEEP all parameters at their `current_value` UNLESS the user explicitly asks to change that specific parameter
+2. Extract specific values mentioned by the user and map them to the appropriate parameter fields
+3. For parameters not explicitly mentioned by the user, use the current_value (or default_value if no current_value exists)
+4. DO NOT change parameters just because they seem related to the query
+5. DO NOT change parameters based on output formatting requests (filtering, column selection, display format)
+
+### Key Distinctions:
+- **Output/Display requests**: Keep ALL parameters unchanged - these affect how data is presented, not what data is fetched
+- **Parameter-specific requests**: Only change the explicitly mentioned parameter
+
+### Special Case: Content Search Queries
+**When searching for specific content (e.g., "find news about X", "search for X", "what about Y"), apply these rules:**
+- If there's a 'limit' parameter, do not use it or if required, set it to a significantly large number (e.g., 100 or more) to ensure comprehensive search results
+- This override applies ONLY when the user is explicitly searching for specific content within the data
+- Examples that trigger this: "find news about", "search for", "what about", "any mentions of", "filter for"
+
+### Understanding User Queries:
+
+**Output/Display requests (DO NOT change any parameters except as noted):**
+- "Get the last 5 dates and close" → Keep ALL parameters, this is about filtering OUTPUT rows
+- "Show in table format" → Keep ALL parameters, this is about display format
+- "Display only date and close columns" → Keep ALL parameters, this is about column selection
+
+**Parameter-specific requests (ONLY change the mentioned parameter):**
+- "Show returns instead of prices" → ONLY change the 'returns' parameter if it exists
+- "Change portfolio to Client 3" → ONLY change the 'portfolio' parameter
+- "Get data for 3 months" → ONLY change the 'period' parameter
+- "Use asset XYZ" → ONLY change the 'asset' parameter
+
+## Content Parameters Must Be Clean
+
+When generating input arguments for content, text, or similar string parameters:
+- NEVER include conversational prefixes, introductions, or explanations
+- FORBIDDEN phrases that must NEVER appear:
+  - "Certainly! Here's a..."
+  - "Here's a short poem for you:"
+  - "Here is what you asked:"
+  - "Absolutely! Here is..."
+  - "Sure! Here's a..."
+  - "I'll create this for you:"
+  - "Let me write..."
+  - Any variation of these conversational starters
+- START DIRECTLY with the actual content - no preamble
+
+# User query
+
+{{ query }}
+
+# Data source
+
+origin: {{ data_source.origin }}
+id: {{ data_source.id }}
+name: {{ data_source.name }}
+description: {{ data_source.description }}
+
+{% if data_source.widget.metadata and data_source.widget.metadata.get('schema') %}
+## CRITICAL: Database Schema
+This is a SQL-enabled data source. When generating SQL queries for the 'query' parameter, you MUST:
+1. Use ONLY the exact column names listed in the schema below
+2. DO NOT infer, guess, or create column names that are not in this schema
+3. If a column name is not in the schema, you CANNOT use it
+4. DO NOT add WHERE clauses unless the user explicitly asks to filter data
+
+**Schema:**
+```json
+{{ data_source.widget.metadata.get('schema') }}
+```
+{% endif %}
+
+## Input arguments
+
+{% for field_name, field_info in data_source.input_fields.items() %}
+name: {{ field_name }}
+description: {{ field_info.description }}
+type: {{ field_info.type }}
+{% if field_info.current_value %}
+current_value: {{ field_info.current_value }} # <-- USE THIS VALUE unless user EXPLICITLY mentions changing "{{ field_name }}"
+{% else %}
+default_value: {{ field_info.default }}
+{% endif %}
+{% if field_info.options %}
+options: {{ field_info.options }}
+{% endif %}
+{% if extra_param_options and field_name in extra_param_options %}
+
+# This parameter has options available, but since it already has a current_value, USE THE CURRENT VALUE
+# Current value is: {{ field_info.current_value }}
+# UNLESS the user specifically asks to change the {{ field_name }}, use: {{ field_info.current_value }}
+# Only consider these other values if user explicitly mentions changing {{ field_name }}:
+
+{% for option in extra_param_options[field_name] %}
+- value: {{ option.value }}
+    ({{ option.label }})
+{% endfor %}
+{% endif %}
+---
+{% endfor %}
+
+## FINAL INSTRUCTIONS: COMPLETE OUTPUT REQUIREMENTS
+
+You MUST generate JSON output containing ALL input arguments defined above. Do not skip any parameters:
+
+{% for field_name, field_info in data_source.input_fields.items() %}
+- "{{ field_name }}": [REQUIRED - generate appropriate value based on query and content]
+{% endfor %}
+
+- Every parameter listed above MUST be included in your JSON response.
+- If a parameter has a current_value, USE IT unless the user explicitly asks to change that specific parameter. Do not omit parameters that have current values.

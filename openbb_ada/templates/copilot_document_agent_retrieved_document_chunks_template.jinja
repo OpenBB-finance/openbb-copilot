@@ -1,0 +1,9 @@
+{% for d in retrieved_document_chunks %}
+==== CHUNK START ====
+content_id: {{ d.retrieved_chunk_id }}
+source_filename: {{ d.metadata.get("name") }}
+----- CONTENT -----
+{{ d.page_content }}
+==== CHUNK END ====
+
+{% endfor %}

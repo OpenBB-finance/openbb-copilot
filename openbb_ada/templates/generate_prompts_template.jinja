@@ -1,0 +1,72 @@
+The context and messages follow below:
+
+```
+{% include 'copilot_widgets_template.jinja' %}
+
+# Context
+{% if context %}
+{% for c in context %}
+name: {{ c.source_info.name }}
+description: {{ c.source_info.description }}
+metadata: {{ c.source_info.metadata }}
+{% endfor %}
+{% else %}
+No context is explicitly added to this conversation.
+{% endif %}
+{% if urls %}
+{% for u in urls %}
+url: {{ u }}
+{% endfor %}
+{% endif %}
+
+# Messages
+{% for m in messages %}
+{{ m.role.value }}: {{ m.content }}
+{% endfor %}
+```
+
+<PromptRequirements>
+Never ask about when data was updated.
+Never use the word "widget".
+Never ask for descriptions of widgets.
+Never ask for the metadata of widgets.
+Never ask for analysis of a ticker compared to the industry or global economic conditions.
+Prompts are allowed to require data from widgets.
+For prompts that reference unstructured data sources (eg. transcripts, filings, news, etc.): use words like "summarize" or "describe" or "analyze".
+Explicitly mention a relevant stock ticker (eg. AAPL instead of Apple), if they are present in the context and related to the suggested prompt.
+<Critical>
+Prompts can not rely on data that is inferable.
+Prompts must be fully answerable by the data EXPLICITLY mentioned in the context.
+The specific data must be EXPLICITLY available in the context, messages or widgets.
+Never suggest prompts for data that is not present.
+It must be possible to answer each suggested prompts using the current context ONLY.
+</Critical>
+</PromptRequirements>
+
+<TaskDescription>
+You must Generate a list of (five!) 5 candidate follow-up human prompts based on the conversation above.
+
+First list each prompt on a new line.
+Then evaluate each prompt based on whether it follows ALL of the above requirements and whether it is answerable, and why.
+Then return up to three most answerable prompts in the final output format.
+At this final stage, you must only include fully-answerable prompts.
+You must exclude mostly-answerable and partially-answerable prompts.
+
+<OutputFormat>
+<Prompts>Prompts go here</Prompts>
+<Evaluation>Evaluation goes here</Evaluation>
+
+<Output>
+<result>
+<item>the first prompt</item>
+<item>the second prompt</item>
+<item>the third prompt</item>
+</result>
+</Output>
+</OutputFormat>
+
+You must returne exactly three prompts.
+If you cannot return three prompts, return an empty result.
+</TaskDescription>
+
+Begin your task.

@@ -1,0 +1,52 @@
+Result / Guidance: {{ answer }}
+
+If the result/guidance says the requested data is unavailable, missing, not found, or cannot be used to create the requested output, your next visible answer to the user must explicitly state that limitation in plain language. Do not respond with only citations, only an artifact tag, or only a completion tool call.
+
+{% if artifact %}
+Artifact UUID: `{{ artifact.source_info.uuid }}` <-- use this to access the data using tools
+Artifact Name: `{{ artifact.source_info.name }}` <-- use this when returning the artifact
+Artifact Sample:
+{% if artifact.data_format.parse_as == "table" %}
+{{ table_preview }}
+{% if has_more_rows %}
+... and {{ remaining_rows }} more rows
+{% endif %}
+{% elif artifact.data_format.parse_as == "chart" %}
+A `{{ artifact.data_format.chart_params.chartType }}` chart {% if artifact.data_format.chart_params.chartType in ['line', 'bar', 'scatter'] %}showing the `{{ artifact.data_format.chart_params.xKey }}` variable on the X-axis and the `{{ artifact.data_format.chart_params.yKey|join("`, `") }}` {% if artifact.data_format.chart_params.yKey|length > 1 %}variables{% else %}variable{% endif %} on the Y-axis{% else %}displaying `{{ artifact.data_format.chart_params.angleKey }}` values with `{{ artifact.data_format.chart_params.calloutLabelKey }}` labels{% endif %}.
+
+{% elif artifact.data_format.parse_as == "text" %}
+{{ artifact.content[:100] }}
+{% endif %}
+
+You can insert this artifact in your final response by writing <|start_artifact_id|>{{ artifact.source_info.name }}<|end_artifact_id|>
+Your next assistant message must be visible to the user and must reference this artifact exactly once using that tag before you call the completion tool.
+IMPORTANT: This is only a sample. You MUST retrieve the full artifact if you need to take further actions with this data.
+{% endif %}
+
+{% if citations %}
+### Citations
+
+{% for c in citations %}
+-----
+id: {{ c.id }}
+source_info: {{ c.source_info }}
+details: {{ c.details }}
+
+You can insert this citation in-line in your final response by writing <|start_citation_id|>{{ c.id }}<|end_citation_id|>.
+-----
+{% endfor %}
+
+You can insert multiple citations in the same answer. Each citation should follow a sentence that uses its content.
+
+### Example 1
+
+**User:** what's the first sentence in the pdf? and what's the first sentence in the introduction section?
+**AI:** The first sentence in the PDF is: "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution." <|start_citation_id|>replace-with-citation-1-id<|end_citation_id|>
+
+The first sentence in the Introduction section is: "Commerce on the Internet has come to rely almost exclusively on financial institutions serving as trusted third parties to process electronic payments." <|start_citation_id|>replace-with-citation-2-id<|end_citation_id|>
+
+### Example 2
+
+**User:** what was AAPL average open price and volume last week?
+**AI:** The average open price for AAPL last week was $X. <|start_citation_id|>some_citation_id<|end_citation_id|> The average trading volume during the same period was Y shares. <|start_citation_id|>other_citation_id<|end_citation_id|>
+{% endif %}

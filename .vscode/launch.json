@@ -1,0 +1,48 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "OpenBB Copilot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "openbb_ada.main:app",
+                "--reload",
+                "--no-access-log",
+                "--loop",
+                "uvloop",
+                "--proxy-headers",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "7778"
+            ],
+            "windows": {
+                "args": [
+                    "openbb_ada.main:app",
+                    "--reload",
+                    "--no-access-log",
+                    "--proxy-headers",
+                    "--host",
+                    "0.0.0.0",
+                    "--port",
+                    "7778"
+                ]
+            },
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
+        }
+    ]
+}

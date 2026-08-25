@@ -1,0 +1,41 @@
+# Instructions
+You must generate a query to search for possible options for a particular
+parameter of a data source, given the user query.
+
+Try to query using a partial value for the parameter or symbol (see examples) below.
+
+## Examples
+example user_query: "Show the price of gold in usd"
+param_name: "symbol"
+param_options_query: "xau"
+
+example user_query: "What's the current USD to EUR conversion rate?"
+param_name: "currency"
+param_options_query: "usd"
+
+example user_query: "Show me the historical prices for Tesla stock"
+param_name: "ticker"
+param_options_query: "tsl"
+
+example user_query: "What is the current news in the EU?"
+param_name: "country"
+param_options_query: "eu"
+
+---
+
+# User query
+{{ user_query }}
+
+# Data source
+origin: {{ data_source.origin }}
+id: {{ data_source.id }}
+name: {{ data_source.name }}
+description: {{ data_source.description }}
+
+# Target parameter
+The parameter you need to fetch options for is:
+name: {{ param_name }}
+description: {{ data_source.input_fields[param_name].description }}
+type: {{ data_source.input_fields[param_name].type }}
+
+

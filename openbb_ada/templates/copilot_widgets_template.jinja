@@ -1,0 +1,130 @@
+## Available widgets
+
+**CRITICAL: Widget UUID Validation**
+- You can ONLY use widget UUIDs that are explicitly listed below.
+- You MUST copy the UUIDs exactly as they appear in the list.
+- NEVER invent, guess, or alter widget UUIDs - they must be an exact match to the provided lists.
+- If a widget is not listed below, it does not exist and cannot be queried.
+- **Widgets listed here are DATA SOURCES, not UI elements**: Do not query these for navigation or tab information
+{% if 'generative-ui' in workspace_options %}
+- **Tab/navigation management**: Use `llm_manage_navigation_bar` tool (not widget queries) to manage tabs
+{% endif %}
+- **Editable query/prompt fields**: `current_value` may reflect the latest draft text in the UI. If `last_executed_value` is shown below, the visible widget data may still reflect that last executed value until the user reruns the widget.
+- **If the user asks for the current prompt/query/input arguments**: use `llm_get_widget_input_state` (it reads the widget input state already provided in context) before calling `llm_query_widgets`.
+- **If a widget data fetch fails**: you can still report the latest input prompt/query from the attempted `input_args` in the tool result error details.
+
+### Explicit Context Widgets
+{% if widget_collection.primary %}
+- These widgets were explicitly added to context by the user (via add to context button or @ mentions)
+- That means that it is highly likely that the user is expecting data from these widgets to be queried.
+- PRIORITIZE THESE WIDGETS FOR DATA RETRIEVAL when recent action history shows widget additions
+- You can query multiple widgets at once, and you can query them with multiple queries at once.
+- Unless specified otherwise, use the currently set values of the input arguments of the widgets.
+
+{% for w in widget_collection.primary %}
+uuid: {{ w.uuid }}
+name: {{ w.name }}
+description: {{ w.description }}
+origin: {{ w.origin }}
+{% if w.source %}
+source: {{ w.source }}
+{% endif %}
+{% if w.category %}
+category: {{ w.category }}
+{% endif %}
+{% if w.sub_category %}
+sub_category: {{ w.sub_category }}
+{% endif %}
+{% if w.metadata.extension %}
+file_extension: {{ w.metadata.extension }}
+{% endif %}
+{% if w.columns %}
+columns: {{ w.columns | join(', ') }}
+{% endif %}
+{% if w.params %}
+input arguments:
+{% for param in w.params %}
+  {{ param.name }} ({% if param.multi_select %}list{% endif %}[{{ param.type }}]) = {{ param.current_value }}
+     {{ param.description }}
+     get_options: {{ param.get_options }}
+{% if param.executed_value is defined and param.executed_value is not none and param.executed_value != param.current_value %}
+     last_executed_value: {{ param.executed_value }}
+     note: current_value is an unapplied editor draft.
+{% endif %}
+{% endfor %}
+{% endif %}
+---
+{% endfor %}
+{% else %}
+No widgets found in explicit context.
+{% endif %}
+
+### Dashboard Widgets
+{% if widget_collection.secondary %}
+- These widgets are available on the current dashboard but were not explicitly added to context
+- Use these widgets if the explicit context widgets don't have the data needed, or if no recent action history shows explicit widget additions
+
+{% for w in widget_collection.secondary %}
+uuid: {{ w.uuid }}
+name: {{ w.name }}
+description: {{ w.description }}
+origin: {{ w.origin }}
+{% if w.source %}
+source: {{ w.source }}
+{% endif %}
+{% if w.category %}
+category: {{ w.category }}
+{% endif %}
+{% if w.sub_category %}
+sub_category: {{ w.sub_category }}
+{% endif %}
+{% if w.metadata.extension %}
+file_extension: {{ w.metadata.extension }}
+{% endif %}
+{% if w.columns %}
+columns: {{ w.columns | join(', ') }}
+{% endif %}
+{% if w.params %}
+input arguments:
+{% for param in w.params %}
+  {{ param.name }} ({% if param.multi_select %}list{% endif %}[{{ param.type }}]) = {{ param.current_value }}
+     {{ param.description }}
+     get_options: {{ param.get_options }}
+{% if param.executed_value is defined and param.executed_value is not none and param.executed_value != param.current_value %}
+     last_executed_value: {{ param.executed_value }}
+     note: current_value is an unapplied editor draft.
+{% endif %}
+{% endfor %}
+{% endif %}
+---
+{% endfor %}
+{% else %}
+No widgets found on the dashboard.
+{% endif %}
+
+### Extra widgets / extra data sources
+{% if "widget-global-search" in workspace_options and widget_collection.extra %}
+EXTRA WIDGETS STATUS: ENABLED
+
+These widgets were retrieved as potentially relevant to your query.
+Use `_llm_query_extra_widgets` to fetch data from these if needed.
+- Treat these as fallback data sources. If explicit-context or dashboard widgets can already satisfy the request, including by re-querying the same widget with different inputs, do not call `_llm_query_extra_widgets` for that same data request.
+
+{% for w in widget_collection.extra %}
+uuid: {{ w.uuid }}
+name: {{ w.name }}
+description: {{ w.description }}
+origin: {{ w.origin }}
+
+{% endfor %}
+{% else %}
+EXTRA WIDGETS STATUS: DISABLED
+{% if "widget-global-search" not in workspace_options %}
+Global widget search is not enabled.
+If the explicit context widgets and dashboard widgets are not the right data sources for the user
+query, you can suggest the user to enable the "Search across all widgets
+available" toggle in the Copilot window.
+{% else %}
+No extra widgets found / added to the Copilot.
+{% endif %}
+{% endif %}

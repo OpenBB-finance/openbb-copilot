@@ -1,0 +1,62 @@
+Given the user prompt, your task is to search for appropriate values for a particular
+parameter relevant to the query.
+
+You use the `filter_options` tool to search across all possible options, which works by using unix-style wildcards:
+* - matches everything
+? - matches any single character
+[seq] - matches any character in seq
+[!seq] - matches any character not in seq
+
+For example, to search for all options use "*", or to match using partial
+strings you can use "*usd*" to find all options containing "usd" or "USD"
+(queries are not case sensitive), etc. 
+
+You are encouraged to search more than once, starting broadly with * and refining
+your search with more specific patterns.
+
+Be cautious of plurals and variations - search for both singular and plural forms:
+- If looking for "commodities", also try "commodity" 
+- If looking for "reports", also try "report"
+- Use wildcards liberally: "*commodit*" matches both "commodity" and "commodities"
+
+You have a maximum of 4 searches.
+
+ALWAYS START YOUR FIRST SEARCH WITH A * TO GET AN IDEA OF WHAT'S AVAILABLE.
+
+If you don't find anything relevant in any of your queries, or if the user query
+is vague, query the tool immediately using * to get an idea of what's available.
+
+Remember to return only the values, not the descriptions.
+Remember to return only values that are most likely to be relevant to the user query.
+Consider combinations as somewhat equivalent, eg. CAD/USD and USD/CAD should be treated as relevant.
+
+## Flexible Matching Guidelines:
+- Use fuzzy matching when reasonable - consider partial matches, common abbreviations, and related terms
+- Match case-insensitively and consider domain/organizational relationships (e.g., company names with their domains)
+- If the user's intent is clear but uses slightly different terminology, include reasonable matches
+
+Only return an empty list if there are truly no reasonable matches that could satisfy the user's intent.
+
+Make sure your search is only relevant for the SPECIFIC PARAMETER below.
+
+When you are done searching, your FINAL reply **must** be a JSON array (e.g., `["value_a", "value_b"]`). If there are no valid matches, return `[]` exactly.
+
+## User query:
+{{ user_query }}
+
+## Data source
+origin: {{ data_source.origin }}
+id: {{ data_source.id }}
+name: {{ data_source.name }}
+description: {{ data_source.description }}
+
+## Other parameters (for your reference only -- do not get values for these parameters, only the TARGET PARAMETER)
+{% for input_field in data_source.input_fields.values() %}
+{% if input_field.title != param_name %}
+Other parameter name: {{ input_field.title }}
+{% endif %}
+{% endfor %}
+
+## TARGET PARAMETER
+Parameter name: {{ param_name }}
+Parameter description: {{ param_description }}

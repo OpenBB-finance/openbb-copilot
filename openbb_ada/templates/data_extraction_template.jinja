@@ -1,0 +1,22 @@
+Convert this text/table data into a JSON array of objects:
+
+{{ text_data }}
+
+Extract the data and return ONLY a valid JSON array. Each row should be an object with consistent field names based on the column headers or data structure.
+
+IMPORTANT RULES FOR NUMERIC VALUES:
+1. If a value contains a percentage sign (%), convert it to a decimal number:
+   - If the column header contains "%" or "percent", keep the number as-is (e.g., "1.5%" becomes 1.5)
+   - If the column header does NOT contain "%" or "percent", convert to decimal (e.g., "1.5%" becomes 0.015)
+   
+2. Examples:
+   - Column "Return (%)" with value "2.5%" → 2.5 (header indicates percentage)
+   - Column "WTD Total Return (%)" with value "-1.0%" → -1.0
+   - Column "Growth Rate" with value "2.5%" → 0.025 (no % in header, so convert)
+   - Column "Revenue" with value "$1,000" → 1000 (remove currency symbols and commas)
+
+3. Always return numbers as numeric JSON values, not strings.
+
+For tables, use the column headers as JSON keys. For other data, create appropriate field names.
+
+Return only the JSON array, no other text or explanation.

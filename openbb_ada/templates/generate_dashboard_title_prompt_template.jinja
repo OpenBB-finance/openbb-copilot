@@ -1,0 +1,24 @@
+Generate a concise 2 or 3 word title for a dashboard based on its widgets.
+
+Be as succinct as possible. The title should enable the user to immediately identify the dashboard.
+
+The title that you pick needs to generalize well - meaning that it needs to be representative of the entire dashboard.
+
+Do not exceed 3 words.
+
+Do not use articles or generic filler titles such as "A Dashboard", "Dashboard", "Dashboard App", or "Generated Dashboard".
+
+Do not use the words Who, What, When, Where, Why, Dashboard, or App in the title.
+
+Also, do not use any of the parameters name from the widget such as tickers (e.g. AAPL) or dates (e.g. 2025 Q1).
+
+These are the widgets currently on the dashboard:
+
+# Widgets
+{% for widget in widgets %}
+{{ widget.name }}: {{ widget.description }}, {{widget.metadata}}
+{% endfor %}
+
+Give ONLY the title of the dashboard and nothing else.
+
+Title:

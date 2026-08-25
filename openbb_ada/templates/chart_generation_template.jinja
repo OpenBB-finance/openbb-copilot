@@ -1,0 +1,98 @@
+Your task is to convert a table artifact into a chart artifact based on the user's query. At the moment, you can only produce the following chart types: line, bar, pie, donut, scatter.
+
+{% if requested_chart_type %}
+IMPORTANT: User specifically requested {{ requested_chart_type }} chart. Use chartType: "{{ requested_chart_type }}"
+{% elif context %}
+Context: {{ context }}
+If the context mentions a specific chart type (scatter, donut, pie, line, bar), use that type.
+{% else %}
+Choose the best chart type from: line, bar, pie, donut, scatter
+{% endif %}
+
+Table data sample (first 3 rows):
+{{ data_sample | tojson }}
+
+### Line chart, Scatter chart
+- xKey: The variable on the X axis.
+- yKey: The variable on the y axis. Can be a list of variables.
+
+### Bar chart
+- xKey: The variable on the X axis.
+- yKey: The variable on the y axis. Can be a list of variables.
+
+### Pie chart, Donut chart
+- angleKey: The variable specifying the amount, size, or value of slice of the pie or donut.
+- calloutLabelKey: The variable specifying the label for each slice of the pie or donut.
+Example: angleKey: "amount", calloutLabelKey: "asset" if the data has asset and amount columns with values like Stocks/60000 and Bonds/40000.
+
+Guidelines:
+- **PRIORITIZE the user's explicit chart type request above all other considerations**
+- Bar can ONLY be vertical (i.e. numerical values on the y axis).
+- Pick the most sensible "chartType", and then follow the appropriate inputs for that chart type (eg. "xKey", "yKey", "angleKey", and "calloutLabelKey") based on the user's query.
+- For categorical variables, always use the xKey.
+- If the user doesn't specifically ask in their query, choose sensible values for chartType, xKey and yKey.
+
+CRITICAL - Detecting Grouped Bar Charts:
+You must analyze the data structure to determine if this is a grouped bar chart scenario. There are TWO common data formats:
+
+**FORMAT 1: Long Format (3-column structure) - USE LONG FORMAT PARAMETERS**
+If the data contains exactly these 3 types of columns:
+- A time/date column (period_ending, date, year, quarter, month, etc.)
+- A category/entity column with multiple distinct values (company, product, region, etc.)
+- A numerical value column (total_revenue, revenue, sales, etc.)
+
+Example long format data:
+- period_ending: 2021-12-31, 2021-12-31, 2022-12-31, 2022-12-31
+- company: AMZN, AAPL, AMZN, AAPL
+- total_revenue: 469822000000, 365817000000, 513983000000, 394328000000
+
+Configuration for 3-column data: xKey="period_ending", yKey=["total_revenue"]
+Use the value column name in yKey array to match the actual data structure.
+Frontend will auto-detect the company column and create proper grouped bars.
+
+**FORMAT 2: Wide Format (pivoted structure)**
+If the data contains:
+- A time/date column
+- Multiple company-specific revenue columns (amzn_revenue, aapl_revenue, msft_revenue, etc.)
+
+Example wide format data:
+- period_ending: 2021-12-31, 2022-12-31
+- amzn_revenue: 469822000000, 513983000000
+- aapl_revenue: 365817000000, 394328000000
+- msft_revenue: null, null
+
+Configuration for wide format: xKey="period_ending", yKey=["amzn_revenue", "aapl_revenue", "msft_revenue"]
+
+**Detection Rules:**
+1. If you see exactly 3 columns with time + category + value → ALWAYS use LONG FORMAT to avoid mismatch
+2. If you see time column + multiple entity-specific value columns → Use wide format configuration
+3. Long format works reliably with frontend auto-detection for 3-column data
+4. Wide format should only be used when data is already pivoted (has entity-specific columns)
+
+**CRITICAL OVERRIDE FOR 3-COLUMN DATA:**
+When you detect exactly 3 columns (time, category, value), you MUST use LONG FORMAT to avoid data-parameter mismatch:
+- Setting xKey to the time/date column
+- Setting yKey to [value column name] (single item array)
+- Let frontend auto-detect the category column for proper grouping
+
+**Example for revenue comparison data:**
+Input: period_ending, total_revenue, company (with companies: AMZN, AAPL, MSFT)
+Output: xKey="period_ending", yKey=["total_revenue"]
+This lets the frontend auto-detect the company column for proper grouping.
+
+**CRITICAL DATA-PARAMETER MISMATCH DETECTION:**
+If you generate wide format parameters (yKey with multiple values) but the data still has a category column:
+- Data has: period_ending, total_revenue, company
+- Parameters set: xKey="period_ending", yKey=["AMZN", "AAPL", "MSFT"]
+- This is a MISMATCH! The frontend expects columns named AMZN, AAPL, MSFT but only sees company column.
+
+SOLUTION: For 3-column data, ALWAYS use long format parameters:
+- xKey: time column name
+- yKey: [value column name] (single item array)
+- Let frontend auto-detect the category column for grouping
+
+Sample of the artifact data you must convert:
+
+{{ table_artifact }}
+
+Return ONLY the JSON parameters:
