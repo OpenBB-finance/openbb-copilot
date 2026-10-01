@@ -3,7 +3,7 @@
 The service is that backend service that powers the OpenBB Ada (formerly OpenBB
 Copilot) agent that is included as the default agent in OpenBB Workspace.
 
-The agent makes use of the same protocol described by the [OpenBB AI SDK](https://github.com/openbb-finance/openbb-ai-sdk).
+The agent makes use of the same protocol described by the [OpenBB AI SDK](https://github.com/openbb-finance/openbb-ai).
 While we are in the process of migrating over to the helpers, the API models
 are shared (this project depends on `openbb-ai`).
 
